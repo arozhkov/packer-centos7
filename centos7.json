@@ -1,0 +1,51 @@
+{
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+          "yum update -y",
+          "yum install -y epel-release",
+          "yum install -y bzip2 dkms gcc kernel-devel-`uname -r` kernel-headers make perl",
+          "mkdir -p /media/cdrom",
+          "mount -t iso9660 VBoxGuestAdditions.iso /media/cdrom/",
+          "sh -c 'cd /media/cdrom; ./VBoxLinuxAdditions.run; true'",
+          "uname -r >> version.txt",
+          "dracut initramfs-`uname -r`.img `uname -r`",
+          "grub2-mkconfig -o /boot/grub2/grub.cfg"
+        ]
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "guest_os_type": "RedHat_64",
+      "iso_url": "http://centos.mirrors.ovh.net/ftp.centos.org/7/isos/x86_64/CentOS-7-x86_64-Minimal-1503-01.iso",
+      "iso_checksum": "d07ab3e615c66a8b2e9a50f4852e6a77",
+      "iso_checksum_type": "md5",
+      "ssh_username": "root",
+      "ssh_password": "packer",
+      "ssh_timeout": "30m",
+
+      "disk_size": 10000,
+      "guest_additions_mode": "upload",
+      "guest_additions_path": "VBoxGuestAdditions.iso",
+      "http_directory": "http",
+      "vm_name": "centos7",
+      "boot_wait": "10s",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort}}/ks7.cfg<enter>"
+      ],
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "1024"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "vagrant/centos7.box",
+      "type": "vagrant",
+      "keep_input_artifact": false
+    }
+  ]
+}
