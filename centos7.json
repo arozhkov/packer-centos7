@@ -9,8 +9,6 @@
           "mkdir -p /media/cdrom",
           "mount -t iso9660 VBoxGuestAdditions.iso /media/cdrom/",
           "sh -c 'cd /media/cdrom; ./VBoxLinuxAdditions.run; true'",
-          "uname -r >> version.txt",
-          "dracut initramfs-`uname -r`.img `uname -r`",
           "grub2-mkconfig -o /boot/grub2/grub.cfg"
         ]
     }
